@@ -8,6 +8,8 @@ sanic = "*"
 sqlalchemy = "*"
 "flake8" = "*"
 aiopg = "*"
+sanic-session = "*"
+pyjwt = "*"
 
 [dev-packages]
 

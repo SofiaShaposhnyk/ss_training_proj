@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "6bb552c7b8f1788a77223515593558f621b52bc05adfb63a77a132d75160699e"
+            "sha256": "b24e34c30b8f9569bc91f306b634455e47ea78ebeced360321230c6e25efa81b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -98,6 +98,14 @@
             ],
             "version": "==1.6.0"
         },
+        "pyjwt": {
+            "hashes": [
+                "sha256:30b1380ff43b55441283cc2b2676b755cca45693ae3097325dea01f3d110628c",
+                "sha256:4ee413b357d53fd3fb44704577afac88e72e878716116270d722723d65b42176"
+            ],
+            "index": "pypi",
+            "version": "==1.6.4"
+        },
         "sanic": {
             "hashes": [
                 "sha256:18a3bd729093ac93a245849c44045c505a11e6d36da5bf231cb986bfb1e3c14c",
@@ -105,6 +113,14 @@
             ],
             "index": "pypi",
             "version": "==0.7.0"
+        },
+        "sanic-session": {
+            "hashes": [
+                "sha256:4aabebf89dd4dcafe262137d4ae6e851a6d38a51f471caa7ab7216e222cd8b9b",
+                "sha256:ec8d3bb134cd5bdb3b58404e57f12a11ad7366517df65c675b60e64a3458574e"
+            ],
+            "index": "pypi",
+            "version": "==0.1.5"
         },
         "sqlalchemy": {
             "hashes": [
