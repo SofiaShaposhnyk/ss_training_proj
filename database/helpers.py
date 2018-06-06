@@ -4,7 +4,8 @@ from sqlalchemy.sql import select
 from database.config import db
 from database import models
 
-dsn = 'user={user} dbname={db_name} host={host} password={password}'.format(**db)
+dsn = 'user={user} dbname={db_name} host={host} ' \
+      'password={password}'.format(**db)
 
 
 async def create_db_engine():
