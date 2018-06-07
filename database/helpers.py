@@ -3,6 +3,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.sql import select
 from database.config import db
 from database import models
+from sqlalchemy import create_engine as ce
+import asyncio
 
 dsn = 'user={user} dbname={db_name} host={host} ' \
       'password={password}'.format(**db)
@@ -54,3 +56,17 @@ async def get_entry(table_name, id=None):
                 select_query = select([table_name])
             result = await connection.execute(select_query)
             return _convert_resultproxy_to_list(result)
+
+#
+# async def ins_user():
+#     engine = await create_db_engine()
+#     async with engine:
+#         async with await engine.acquire() as connection:
+#             insert_1 = insert(models.User).values(login='user_1', password='pass_hash_1')
+#             insert_2 = insert(models.User).values(login='user_2', password='pass_hash_2')
+#             await connection.execute(insert_1)
+#             await connection.execute(insert_2)
+#
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(ins_user())
+# loop.close()
