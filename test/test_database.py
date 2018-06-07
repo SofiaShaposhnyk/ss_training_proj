@@ -2,9 +2,9 @@ import asynctest
 from aiopg import sa
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
-from app.config import db
+from config import db
 from app.models import Base, User
-from app.database import get_entry
+from app.database import get_all_entry
 
 
 class TestDatabase(asynctest.TestCase):
@@ -50,5 +50,5 @@ class TestDatabase(asynctest.TestCase):
     async def test_get_entry_all(self):
         expected = [{'id': 1, 'login': 'user_1', 'password': 'pass_hash_1'},
                     {'id': 2, 'login': 'user_2', 'password': 'pass_hash_2'}]
-        actual = await get_entry(User)
+        actual = await get_all_entry(User)
         self.assertEqual(expected, actual)
