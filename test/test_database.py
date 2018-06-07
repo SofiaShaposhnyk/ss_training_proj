@@ -2,9 +2,9 @@ import asynctest
 from aiopg import sa
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
-from database.config import db
-from database.models import Base, User
-from database.helpers import get_entry
+from app.config import db
+from app.models import Base, User
+from app.database import get_entry
 
 
 class TestDatabase(asynctest.TestCase):

@@ -26,7 +26,7 @@ class ProjectView(HTTPMethodView):
 class LoginView(HTTPMethodView):
     async def post(self, request):
         return await login(request)
-    
+
 
 app.add_route(SmokeView.as_view(), '/smoke')
 app.add_route(ProjectView.as_view(), '/projects')

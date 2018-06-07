@@ -28,5 +28,5 @@ class Project(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column('user', Integer, ForeignKey('user.id'))
-    createdate = Column('date', Date, nullable=True)
+    create_date = Column('date', Date, nullable=True)
     invoices = relationship('Invoice')
