@@ -1,6 +1,6 @@
 from sanic import Sanic
 from sanic.views import HTTPMethodView
-from app.service_resource import (smoke, project, login)
+from web_part.service_resource import (smoke, project, login)
 
 app = Sanic(__name__)
 
