@@ -1,9 +1,28 @@
-import asyncio
 from aiopg.sa import create_engine
 import sqlalchemy as sa
 from config import db
 
 metadata = sa.MetaData()
+
+
+class DBEngine(object):
+    __engine = None
+    __connection = None
+
+    @staticmethod
+    async def get_connection():
+        if not DBEngine.__connection:
+            await DBEngine.set_state()
+        return DBEngine.__connection
+
+    @staticmethod
+    async def set_state():
+        DBEngine.__engine = await create_engine(user=db['db_user'],
+                                                password=db['db_password'],
+                                                host=db['db_host'],
+                                                dbname=db['db_name'])
+        DBEngine.__connection = await DBEngine.__engine.acquire()
+
 
 users = sa.Table('users', metadata,
                  sa.Column('id', sa.Integer, autoincrement=True, primary_key=True),
@@ -23,51 +42,66 @@ invoices = sa.Table('invoices', metadata,
 
 async def create_tables(conn):
     await conn.execute('''CREATE TABLE users (
-                                        id serial PRIMARY KEY,
-                                        login varchar(255),
-                                        password_hash varchar(255))''')
+                                              id serial PRIMARY KEY,
+                                              login varchar(255),
+                                              password_hash varchar(255))''')
     await conn.execute('''CREATE TABLE projects (
-                                id serial PRIMARY KEY,
-                                user_id int references users(id),
-                                create_date date)''')
+                                                 id serial PRIMARY KEY,
+                                                 user_id int references users(id),
+                                                 create_date date)''')
     await conn.execute('''CREATE TABLE invoices (
-                                id serial PRIMARY KEY,
-                                project_id int references projects(id),
-                                description varchar(255))''')
+                                                 id serial PRIMARY KEY,
+                                                 project_id int references projects(id),
+                                                 description varchar(255))''')
 
 
 async def create_db():
     async with create_engine('user={db_user} host={db_host} password={db_password}'.format(**db)) as engine:
         async with engine.acquire() as connection:
-            await connection.execute('DROP DATABASE IF EXISTS ss_train')
-            await connection.execute('CREATE DATABASE ss_train')
+            await connection.execute('DROP DATABASE IF EXISTS {}'.format(db['db_name']))
+            await connection.execute('CREATE DATABASE {}'.format(db['db_name']))
             await prepare_tables()
     await engine.wait_closed()
 
 
 async def prepare_tables():
-    async with create_engine('user={db_user} dbname={db_name} host={db_host} password={db_password}'.format(**db)) as engine:
-        async with engine.acquire() as connection:
-            await create_tables(connection)
-            await upsert_entry(connection, users, login='user_111', password_hash='password_111')
-            await upsert_entry(connection, users, login='login_2', password_hash='password_2')
-            result = await get_all_entry(connection, users)
-            print(result)
-    await engine.wait_closed()
+            await create_tables(await DBEngine.get_connection())
 
 
-async def upsert_entry(conn, table_name, **kwargs):
-    insert_query = table_name.insert().values(**kwargs)
-    await conn.execute(insert_query)
+async def insert_entry(table_name, **kwargs):
+        conn = await DBEngine.get_connection()
+        insert_query = table_name.insert().values(**kwargs)
+        await conn.execute(insert_query)
 
 
-async def delete_entry(conn, table_name, id_entry=None):
-    delete_query = table_name.delete().where(table_name == id_entry)
-    await conn.execute(delete_query)
+async def update_entry(table_name, req_id, **kwargs):
+        conn = await DBEngine.get_connection()
+        update_query = table_name.update().where(table_name.columns.id == req_id).values(**kwargs)
+        await conn.execute(update_query)
 
 
-async def get_all_entry(conn, table_name):
-    return convert_resultproxy_to_list(await conn.execute(table_name.select()))
+async def delete_entry(table_name, entry_id=None):
+        conn = await DBEngine.get_connection()
+        delete_query = table_name.delete().where(table_name.columns.id == int(entry_id))
+        await conn.execute(delete_query)
+
+
+# NEED REFACTOR
+async def get_entry(table_name, entry_id=None, project_id=None):
+        conn = await DBEngine.get_connection()
+        if entry_id:
+            if project_id:
+                return convert_resultproxy_to_list(await conn.execute(table_name.select(
+                    table_name.columns.id == entry_id and table_name.columns.project_id == project_id)))
+            else:
+                return convert_resultproxy_to_list(await conn.execute(
+                    table_name.select(table_name.columns.id == entry_id)))
+        else:
+            if project_id:
+                return convert_resultproxy_to_list(await conn.execute(table_name.select().where(
+                    table_name.columns.project_id == project_id)))
+            else:
+                return convert_resultproxy_to_list(await conn.execute(table_name.select()))
 
 
 def convert_resultproxy_to_list(result_proxy):
@@ -75,7 +109,3 @@ def convert_resultproxy_to_list(result_proxy):
     for row in result_proxy:
         result.append(dict(row))
     return result
-
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(create_db())
