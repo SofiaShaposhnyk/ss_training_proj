@@ -1,6 +1,7 @@
 from aiopg.sa import create_engine
 import sqlalchemy as sa
 from config import db
+import asyncio
 
 metadata = sa.MetaData()
 
@@ -84,6 +85,14 @@ async def delete_entry(table_name, entry_id=None):
         conn = await DBEngine.get_connection()
         delete_query = table_name.delete().where(table_name.columns.id == int(entry_id))
         await conn.execute(delete_query)
+
+
+async def get_user_by_login(req_login):
+    engine = await DBEngine.get_connection()
+    async with engine.acquire() as conn:
+        query = users.select(users.columns.login == req_login)
+        result = await conn.execute(query)
+        return convert_resultproxy_to_list(result)
 
 
 # NEED REFACTOR

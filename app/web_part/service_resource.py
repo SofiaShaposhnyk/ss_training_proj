@@ -1,6 +1,7 @@
 from sanic.response import json, text
 from processor.authorization import tokenize
 from app.database import get_entry, delete_entry, insert_entry, update_entry, projects, invoices
+from app.services.authorization import check_login_data
 
 
 async def smoke(request):
@@ -8,8 +9,7 @@ async def smoke(request):
 
 
 async def login(request):
-    token = await tokenize({request.args.get('user'): request.args.get('pass')})
-    return text(token)
+    await check_login_data(request)
 
 
 async def project(request):

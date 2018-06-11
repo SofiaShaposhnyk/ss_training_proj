@@ -1,5 +1,6 @@
 from sanic import Sanic
 from sanic.views import HTTPMethodView
+from app.database import DBEngine
 from app.web_part.service_resource import smoke, project, login, invoice, project_id, invoice_id
 
 app = Sanic(__name__)
@@ -71,6 +72,13 @@ class InvoiceView(HTTPMethodView):
     @staticmethod
     async def delete(request, id_invoice, id_project):
         return await invoice_id(request, id_invoice, id_project)
+
+
+@app.listener('after_server_stop')
+async def close_db(app, loop):
+    engine = await DBEngine.get_connection()
+    engine.close()
+    await engine.wait_closed()
 
 
 app.add_route(SmokeView.as_view(), '/smoke')
