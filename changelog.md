@@ -4,3 +4,4 @@
 * Created endpoints for CRUD functions
 * Created class-storage for DB engine
 * Added validation for PUT and POST requests
+* Added authorization

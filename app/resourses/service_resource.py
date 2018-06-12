@@ -7,11 +7,12 @@ from app.services.validation import ProjectsSchema, InvoicesSchema
 
 
 async def login(request):
-    await check_login_data(request)
+    return await check_login_data(request)
 
 
 async def registration(request):
-    return await create_user(request)
+    await create_user(request)
+    return json({'message': 'user created'})
 
 
 async def project(request):
@@ -25,9 +26,10 @@ async def project(request):
             return json({'message': 'Invalid parameters'})
         await insert_entry(projects, user_id=data[0]['user_id'],
                            create_date=data[0]['create_date'])
+        return json({'message': 'entry created'})
     if request.method == 'DELETE':
         await delete_entry(projects)
-        return text('projects deleted')
+        return json({'message': 'projects deleted'})
 
 
 async def project_id(request, id_project):
@@ -41,9 +43,10 @@ async def project_id(request, id_project):
             return json({'message': 'Invalid parameters'})
         await update_entry(projects, id_project, user_id=data[0]['user_id'],
                            create_date=data[0]['create_date'])
+        return json({'message': 'project updated'})
     if request.method == 'DELETE':
         await delete_entry(projects, id_project)
-        return text('projects deleted')
+        return text('project deleted')
 
 
 async def invoice(request, id_project):
@@ -57,6 +60,7 @@ async def invoice(request, id_project):
             return json({'message': 'Invalid parameters'})
         await insert_entry(invoices, project_id=data[0]['project_id'],
                            description=data[0]['description'])
+        return json({'message': 'invoice created'})
     if request.method == 'DELETE':
         await delete_entry(invoices)
         return text('invoices deleted')
@@ -73,6 +77,7 @@ async def invoice_id(request, id_project, id_invoice):
             return json({'message': 'Invalid parameters'})
         await update_entry(invoices, id_invoice, project_id=data[0]['project_id'],
                            description=data[0]['description'])
+        return json({'message': 'invoice updated'})
     if request.method == 'DELETE':
         await delete_entry(invoices, id_invoice)
         return text('invoices deleted')

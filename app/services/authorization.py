@@ -6,6 +6,9 @@ from sanic.exceptions import Unauthorized
 from app import database as db
 
 
+available_url = ['/login', '/registration']
+
+
 async def get_token():
     return secrets.token_hex(16)
 
@@ -20,19 +23,40 @@ async def check_login_data(request):
     stored_pass = stored_info[0]['password_hash']
     if hashed_pass == stored_pass:
         token = await get_token()
-        await insert_redis(user_info['login'], token)
-        await write_cookie(token)
+        await insert_redis(token, user_info['login'])
+        return await response_token(token)
     else:
-        return Unauthorized("Authorization error")
+        raise Unauthorized("Authorization error")
 
 
-async def write_cookie(token):
-    response = json({})
-    response.cookies['token'] = token
+async def response_token(token):
+    response = json({'message': 'authorized'},
+                    headers={'authorization': token},
+                    status=200)
     return response
 
 
-async def insert_redis(login, token):
-    connection = await asyncio_redis.Connection.create(host='localhost',
-                                                       port='6379', poolsize=10)
-    await connection.set(login, token)
+async def insert_redis(token, login):
+    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
+    await connection.set(token, login, expire=86400)
+    connection.close()
+
+
+async def check_token_in_redis(token):
+    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
+    try:
+        await connection.get(token)
+    except TypeError:
+        raise Unauthorized('Authorization error')
+    else:
+        return token
+
+
+async def check_token(request):
+    token = request.headers.get('authorization')
+    if request.path in available_url:
+        return True
+    elif token == await check_token_in_redis(token):
+        return True
+    else:
+        raise Unauthorized('Authorization error')
