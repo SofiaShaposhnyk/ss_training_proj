@@ -1,20 +1,19 @@
 from aiopg.sa import create_engine
 import sqlalchemy as sa
-from config import db
-import asyncio
+import hashlib
+from app.config import db
 
 metadata = sa.MetaData()
 
 
 class DBEngine(object):
     __engine = None
-    __connection = None
 
     @staticmethod
-    async def get_connection():
-        if not DBEngine.__connection:
+    async def get_engine():
+        if not DBEngine.__engine:
             await DBEngine.set_state()
-        return DBEngine.__connection
+        return DBEngine.__engine
 
     @staticmethod
     async def set_state():
@@ -22,7 +21,6 @@ class DBEngine(object):
                                                 password=db['db_password'],
                                                 host=db['db_host'],
                                                 dbname=db['db_name'])
-        DBEngine.__connection = await DBEngine.__engine.acquire()
 
 
 users = sa.Table('users', metadata,
@@ -59,45 +57,53 @@ async def create_tables(conn):
 async def create_db():
     async with create_engine('user={db_user} host={db_host} password={db_password}'.format(**db)) as engine:
         async with engine.acquire() as connection:
-            await connection.execute('DROP DATABASE IF EXISTS {}'.format(db['db_name']))
             await connection.execute('CREATE DATABASE {}'.format(db['db_name']))
             await prepare_tables()
     await engine.wait_closed()
 
 
 async def prepare_tables():
-            await create_tables(await DBEngine.get_connection())
+            await create_tables(await DBEngine.get_engine())
+
+
+async def create_user(request):
+    pass_hash = hashlib.md5(request.args.get('password').encode('utf-8'))
+    await insert_entry(users, login=request.args.get('login'), password_hash=pass_hash.hexdigest())
 
 
 async def insert_entry(table_name, **kwargs):
-        conn = await DBEngine.get_connection()
+    engine = await DBEngine.get_engine()
+    async with engine.acquire() as conn:
         insert_query = table_name.insert().values(**kwargs)
         await conn.execute(insert_query)
 
 
 async def update_entry(table_name, req_id, **kwargs):
-        conn = await DBEngine.get_connection()
+    engine = await DBEngine.get_engine()
+    async with engine.acquire() as conn:
         update_query = table_name.update().where(table_name.columns.id == req_id).values(**kwargs)
         await conn.execute(update_query)
 
 
 async def delete_entry(table_name, entry_id=None):
-        conn = await DBEngine.get_connection()
+    engine = await DBEngine.get_engine()
+    async with engine.acquire() as conn:
         delete_query = table_name.delete().where(table_name.columns.id == int(entry_id))
         await conn.execute(delete_query)
 
 
 async def get_user_by_login(req_login):
-    engine = await DBEngine.get_connection()
+    engine = await DBEngine.get_engine()
     async with engine.acquire() as conn:
         query = users.select(users.columns.login == req_login)
         result = await conn.execute(query)
         return convert_resultproxy_to_list(result)
 
 
-# NEED REFACTOR
+# NEEDS REFACTORING
 async def get_entry(table_name, entry_id=None, project_id=None):
-        conn = await DBEngine.get_connection()
+    engine = await DBEngine.get_engine()
+    async with engine.acquire() as conn:
         if entry_id:
             if project_id:
                 return convert_resultproxy_to_list(await conn.execute(table_name.select(

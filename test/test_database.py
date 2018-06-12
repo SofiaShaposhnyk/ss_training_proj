@@ -2,7 +2,7 @@ import asynctest
 from aiopg import sa
 from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
-from config import db
+from app.config import db
 from app.models import Base, User
 from app.database import get_all_entry
 
