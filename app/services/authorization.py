@@ -12,7 +12,8 @@ async def get_token():
 
 async def check_login_data(request):
     user_info = {
-        'login': request.args.get('login'), 'password': request.args.get('password').encode('utf-8')
+        'login': request.args.get('login'),
+        'password': request.args.get('password').encode('utf-8')
     }
     hashed_pass = hashlib.md5(user_info['password']).hexdigest()
     stored_info = await db.get_user_by_login(request.args.get('login'))
@@ -32,5 +33,6 @@ async def write_cookie(token):
 
 
 async def insert_redis(login, token):
-    connection = await asyncio_redis.Connection.create(host='localhost', port='6379', poolsize=10)
+    connection = await asyncio_redis.Connection.create(host='localhost',
+                                                       port='6379', poolsize=10)
     await connection.set(login, token)

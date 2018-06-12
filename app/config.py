@@ -8,7 +8,7 @@ web = {
 
 db = {
     'db_user': env.get('DB_USER', 'postgres'),
-    'db_password': env.get('DB_PASSWORD', 'allabsorbing'),
+    'db_password': env.get('DB_PASSWORD', ''),
     'db_name': env.get('DB_NAME', 'ss_train'),
     'db_host': env.get('DB_HOST', 'localhost'),
     'db_port': env.get('DB_PORT', 5432)

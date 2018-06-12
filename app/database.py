@@ -55,7 +55,9 @@ async def create_tables(conn):
 
 
 async def create_db():
-    async with create_engine('user={db_user} host={db_host} password={db_password}'.format(**db)) as engine:
+    async with create_engine('user={db_user} '
+                             'host={db_host} '
+                             'password={db_password}'.format(**db)) as engine:
         async with engine.acquire() as connection:
             await connection.execute('CREATE DATABASE {}'.format(db['db_name']))
             await prepare_tables()
@@ -68,7 +70,8 @@ async def prepare_tables():
 
 async def create_user(request):
     pass_hash = hashlib.md5(request.args.get('password').encode('utf-8'))
-    await insert_entry(users, login=request.args.get('login'), password_hash=pass_hash.hexdigest())
+    await insert_entry(users, login=request.args.get('login'),
+                       password_hash=pass_hash.hexdigest())
 
 
 async def insert_entry(table_name, **kwargs):
@@ -81,14 +84,16 @@ async def insert_entry(table_name, **kwargs):
 async def update_entry(table_name, req_id, **kwargs):
     engine = await DBEngine.get_engine()
     async with engine.acquire() as conn:
-        update_query = table_name.update().where(table_name.columns.id == req_id).values(**kwargs)
+        update_query = table_name.update().where(
+            table_name.columns.id == req_id).values(**kwargs)
         await conn.execute(update_query)
 
 
 async def delete_entry(table_name, entry_id=None):
     engine = await DBEngine.get_engine()
     async with engine.acquire() as conn:
-        delete_query = table_name.delete().where(table_name.columns.id == int(entry_id))
+        delete_query = table_name.delete().where(
+            table_name.columns.id == int(entry_id))
         await conn.execute(delete_query)
 
 
@@ -107,7 +112,8 @@ async def get_entry(table_name, entry_id=None, project_id=None):
         if entry_id:
             if project_id:
                 return convert_resultproxy_to_list(await conn.execute(table_name.select(
-                    table_name.columns.id == entry_id and table_name.columns.project_id == project_id)))
+                    table_name.columns.id == entry_id and
+                    table_name.columns.project_id == project_id)))
             else:
                 return convert_resultproxy_to_list(await conn.execute(
                     table_name.select(table_name.columns.id == entry_id)))
