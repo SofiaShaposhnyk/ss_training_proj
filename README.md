@@ -1,1 +1,0 @@
-# ss_training_proj
