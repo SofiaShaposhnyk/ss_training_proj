@@ -1,54 +1,41 @@
 import asynctest
 from aiopg import sa
-from sqlalchemy import create_engine
 from sqlalchemy.dialects.postgresql import insert
 from app.config import db
-from app.models import Base, User
-from app.database import get_all_entry
+from app.database import get_entry, create_db, users, projects, invoices
 
 
 class TestDatabase(asynctest.TestCase):
 
-    @staticmethod
-    def create_sync_engine_test():
-        return create_engine('postgresql://{user}:{password}@{host}/test'.format(**db))
+    class TestEngine(object):
+        __engine = None
 
-    @staticmethod
-    def create_sync_engine_post():
-        return create_engine('postgresql://{user}:{password}@{host}/postgres'.format(**db))
+        @staticmethod
+        async def get_engine():
+            if not TestDatabase.TestEngine.__engine:
+                await TestDatabase.TestEngine.set_state()
+            return TestDatabase.TestEngine.__engine
 
-    @classmethod
-    def prepare_tables(cls):
-        engine = cls.create_sync_engine_test()
-        Base.metadata.create_all(engine)
-
-    @staticmethod
-    async def create_async_engine():
-        return sa.create_engine('user={user} dbname=test host={host} password={password}'.format(**db))
-
-    @classmethod
-    def setUpClass(cls):
-        engine = cls.create_sync_engine_post()
-        with engine.connect() as connection:
-            connection.execution_options(isolation_level="AUTOCOMMIT").execute('create database test')
-            cls.prepare_tables()
+        @staticmethod
+        async def set_state():
+            TestDatabase.TestEngine.__engine = \
+                await sa.create_engine(user=db['db_user'],
+                                       password=db['db_password'],
+                                       host=db['db_host'],
+                                       dbname='test_db')
 
     @classmethod
-    def tearDownClass(cls):
-        engine = cls.create_sync_engine_post()
-        with engine.connect() as connection:
-            connection.execution_options(isolation_level="AUTOCOMMIT").execute('drop database test')
+    async def setUpClass(cls):
+        await create_db('test_db')
 
-    async def setUp(self):
-        async with await self.create_async_engine() as engine:
-            async with engine.acquire() as connection:
-                insert_1 = insert(User).values(login='user_1', password='pass_hash_1')
-                insert_2 = insert(User).values(login='user_2', password='pass_hash_2')
-                await connection.execute(insert_1)
-                await connection.execute(insert_2)
+    @classmethod
+    async def tearDownClass(cls):
+        engine = await cls.TestEngine.get_engine()
+        with engine.acquire() as connection:
+            connection.execute('drop database test_db')
 
     async def test_get_entry_all(self):
         expected = [{'id': 1, 'login': 'user_1', 'password': 'pass_hash_1'},
                     {'id': 2, 'login': 'user_2', 'password': 'pass_hash_2'}]
-        actual = await get_all_entry(User)
+        actual = await get_entry(users)
         self.assertEqual(expected, actual)

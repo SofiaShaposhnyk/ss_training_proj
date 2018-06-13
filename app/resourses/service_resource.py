@@ -1,4 +1,4 @@
-from sanic.response import json, text
+from sanic.response import json
 from marshmallow import ValidationError
 from app.database import create_user, get_entry, delete_entry, insert_entry,\
     update_entry, projects, invoices
@@ -46,7 +46,7 @@ async def project_id(request, id_project):
         return json({'message': 'project updated'})
     if request.method == 'DELETE':
         await delete_entry(projects, id_project)
-        return text('project deleted')
+        return json({'message': 'project deleted'})
 
 
 async def invoice(request, id_project):
@@ -63,7 +63,7 @@ async def invoice(request, id_project):
         return json({'message': 'invoice created'})
     if request.method == 'DELETE':
         await delete_entry(invoices)
-        return text('invoices deleted')
+        return json({'message': 'invoices deleted'})
 
 
 async def invoice_id(request, id_project, id_invoice):
@@ -80,4 +80,4 @@ async def invoice_id(request, id_project, id_invoice):
         return json({'message': 'invoice updated'})
     if request.method == 'DELETE':
         await delete_entry(invoices, id_invoice)
-        return text('invoices deleted')
+        return json({'message': 'invoices deleted'})

@@ -37,19 +37,18 @@ async def response_token(token):
 
 
 async def insert_redis(token, login):
-    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
-    await connection.set(token, login, expire=86400)
-    connection.close()
+    async with asyncio_redis.Connection.create(host='localhost', port=6379) as connection:
+        await connection.set(token, login, expire=86400)
 
 
 async def check_token_in_redis(token):
-    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
-    try:
-        await connection.get(token)
-    except TypeError:
-        raise Unauthorized('Authorization error')
-    else:
-        return token
+    async with asyncio_redis.Connection.create(host='localhost', port=6379) as connection:
+        try:
+            await connection.get(token)
+        except TypeError:
+            raise Unauthorized('Authorization error')
+        else:
+            return token
 
 
 async def check_token(request):
