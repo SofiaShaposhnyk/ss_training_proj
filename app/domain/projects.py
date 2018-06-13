@@ -1,4 +1,4 @@
-from app.database import DBEngine, convert_resultproxy
+from app.services.engine import DBEngine, convert_resultproxy
 from app.services.models import projects
 
 
@@ -29,7 +29,7 @@ class Projects(object):
                 get_query = projects.select(projects.c.id == entry_id)
             else:
                 get_query = projects.select()
-            return convert_resultproxy(await conn.execute(get_query))
+            return await convert_resultproxy(await conn.execute(get_query))
 
     @staticmethod
     async def update(project_id, **kwargs):

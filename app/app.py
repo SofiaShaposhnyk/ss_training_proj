@@ -1,8 +1,7 @@
 from sanic import Sanic
-from app.database import DBEngine
+from app.services.engine import DBEngine
 from app.resourses import login_view, registration_view, projects_view, \
     project_view, invoices_view, invoice_view
-from app.services.authorization import check_token
 
 app = Sanic(__name__)
 

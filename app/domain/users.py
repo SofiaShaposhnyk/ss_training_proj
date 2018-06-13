@@ -1,5 +1,5 @@
 import hashlib
-from app.database import DBEngine, convert_resultproxy
+from app.services.engine import DBEngine, convert_resultproxy
 from app.services.models import users
 
 
@@ -39,4 +39,4 @@ class Users(object):
                 get_query = users.select(users.c.id == entry_id)
             else:
                 get_query = users.select()
-            return convert_resultproxy(await conn.execute(get_query))
+            return await convert_resultproxy(await conn.execute(get_query))

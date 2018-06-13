@@ -1,4 +1,4 @@
-from app.database import DBEngine, convert_resultproxy
+from app.services.engine import DBEngine, convert_resultproxy
 from app.services.models import invoices
 
 
@@ -31,7 +31,7 @@ class Invoices(object):
                                             invoices.c.project_id == project_id)
             else:
                 get_query = invoices.select(invoices.c.project_id == project_id)
-            return convert_resultproxy(await conn.execute(get_query))
+            return await convert_resultproxy(await conn.execute(get_query))
 
     @staticmethod
     async def update(project_id, entry_id, **kwargs):
