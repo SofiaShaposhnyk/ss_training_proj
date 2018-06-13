@@ -44,48 +44,5 @@ async def prepare_tables():
     await create_tables(await DBEngine.get_engine())
 
 
-async def insert_entry(table_name, **kwargs):
-    engine = await DBEngine.get_engine()
-    async with engine.acquire() as conn:
-        insert_query = table_name.insert().values(**kwargs)
-        await conn.execute(insert_query)
-
-
-async def update_entry(table_name, req_id, **kwargs):
-    engine = await DBEngine.get_engine()
-    async with engine.acquire() as conn:
-        update_query = table_name.update().where(
-            table_name.columns.id == req_id).values(**kwargs)
-        await conn.execute(update_query)
-
-
-async def delete_entry(table_name, entry_id=None):
-    engine = await DBEngine.get_engine()
-    async with engine.acquire() as conn:
-        delete_query = table_name.delete().where(
-            table_name.columns.id == int(entry_id))
-        await conn.execute(delete_query)
-
-
-# NEEDS REFACTORING
-async def get_entry(table_name, entry_id=None, project_id=None):
-    engine = await DBEngine.get_engine()
-    async with engine.acquire() as conn:
-        if entry_id:
-            if project_id:
-                return convert_resultproxy(await conn.execute(table_name.select(
-                    table_name.columns.id == entry_id and
-                    table_name.columns.project_id == project_id)))
-            else:
-                return convert_resultproxy(await conn.execute(
-                    table_name.select(table_name.columns.id == entry_id)))
-        else:
-            if project_id:
-                return convert_resultproxy(await conn.execute(table_name.select().where(
-                    table_name.columns.project_id == project_id)))
-            else:
-                return convert_resultproxy(await conn.execute(table_name.select()))
-
-
-def convert_resultproxy(result_proxy):
+async def convert_resultproxy(result_proxy):
     return tuple(map(lambda row: dict(row), result_proxy))

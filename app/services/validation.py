@@ -1,4 +1,9 @@
-from marshmallow import Schema, fields, ValidationError
+from marshmallow import Schema, fields
+from sanic.exceptions import SanicException
+
+
+class ValidationError(SanicException):
+    pass
 
 
 class BaseForm(Schema):

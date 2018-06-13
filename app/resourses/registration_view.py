@@ -1,8 +1,10 @@
 from sanic.views import HTTPMethodView
-from app.resourses.service_resource import registration
+from sanic.response import json
+from app.domain.users import Users
 
 
 class RegistrationView(HTTPMethodView):
     @staticmethod
     async def post(request):
-        return await registration(request)
+        await Users.insert(request.form.get('login'), request.form.get('password'))
+        return json({'message': 'user created'})

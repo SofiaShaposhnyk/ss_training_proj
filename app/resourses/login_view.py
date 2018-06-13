@@ -1,8 +1,9 @@
 from sanic.views import HTTPMethodView
-from app.resourses.service_resource import login
+from app.services.authorization import check_login_data
 
 
 class LoginView(HTTPMethodView):
     @staticmethod
     async def post(request):
-        return await login(request)
+        return await check_login_data(request.form.get('login'),
+                                      request.form.get('password'))

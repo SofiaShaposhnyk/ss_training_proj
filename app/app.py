@@ -14,14 +14,14 @@ async def close_db(app, loop):
     await engine.wait_closed()
 
 
-@app.middleware('request')
-async def check_access(request):
-    await check_token(request)
+# @app.middleware('request')
+# async def check_access(request):
+#     await check_token(request)
 
 
 app.add_route(login_view.LoginView.as_view(), '/login')
 app.add_route(registration_view.RegistrationView.as_view(), '/registration')
 app.add_route(projects_view.ProjectsView.as_view(), '/projects')
-app.add_route(project_view.ProjectView.as_view(), '/projects/<id_project>')
-app.add_route(invoices_view.InvoicesView.as_view(), '/projects/<id_project>/invoices')
-app.add_route(invoice_view.InvoiceView.as_view(), '/projects/<id_project>/invoices/<id_invoice>')
+app.add_route(project_view.ProjectView.as_view(), '/projects/<project_id>')
+app.add_route(invoices_view.InvoicesView.as_view(), '/projects/<project_id>/invoices')
+app.add_route(invoice_view.InvoiceView.as_view(), '/projects/<project_id>/invoices/<invoice_id>')
