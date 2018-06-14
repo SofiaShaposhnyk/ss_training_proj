@@ -15,19 +15,20 @@ class DBEngine(object):
         return cls.__engine
 
 
-async def create_tables(conn):
-    await conn.execute('''CREATE TABLE users (
-                                              id serial PRIMARY KEY,
-                                              login varchar(255),
-                                              password_hash varchar(255))''')
-    await conn.execute('''CREATE TABLE projects (
-                                                 id serial PRIMARY KEY,
-                                                 user_id int references users(id),
-                                                 create_date date)''')
-    await conn.execute('''CREATE TABLE invoices (
-                                                 id serial PRIMARY KEY,
-                                                 project_id int references projects(id),
-                                                 description varchar(255))''')
+async def create_tables(engine):
+    async with engine.acquire() as conn:
+        await conn.execute('''CREATE TABLE users (
+                                                  id serial PRIMARY KEY,
+                                                  login varchar(255),
+                                                  password_hash varchar(255))''')
+        await conn.execute('''CREATE TABLE projects (
+                                                     id serial PRIMARY KEY,
+                                                     user_id int references users(id),
+                                                     create_date date)''')
+        await conn.execute('''CREATE TABLE invoices (
+                                                     id serial PRIMARY KEY,
+                                                     project_id int references projects(id),
+                                                     description varchar(255))''')
 
 
 async def create_db(db_name):

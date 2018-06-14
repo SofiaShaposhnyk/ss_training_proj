@@ -1,8 +1,8 @@
 import asynctest
-from aiopg import sa
-from sqlalchemy.dialects.postgresql import insert
+import asyncio
+from aiopg.sa import create_engine
 from app.config import db
-from app.database import get_entry, create_db, users, projects, invoices
+from app.services.engine import create_db
 
 
 class TestDatabase(asynctest.TestCase):
@@ -10,32 +10,26 @@ class TestDatabase(asynctest.TestCase):
     class TestEngine(object):
         __engine = None
 
-        @staticmethod
-        async def get_engine():
-            if not TestDatabase.TestEngine.__engine:
-                await TestDatabase.TestEngine.set_state()
-            return TestDatabase.TestEngine.__engine
-
-        @staticmethod
-        async def set_state():
-            TestDatabase.TestEngine.__engine = \
-                await sa.create_engine(user=db['db_user'],
-                                       password=db['db_password'],
-                                       host=db['db_host'],
-                                       dbname='test_db')
+        @classmethod
+        async def get_engine(cls):
+            if not cls.__engine:
+                cls.__engine = await create_engine(user=db['db_user'],
+                                                   password=db['db_password'],
+                                                   host=db['db_host'],
+                                                   dbname=db['test_db'])
+            return cls.__engine
 
     @classmethod
-    async def setUpClass(cls):
-        await create_db('test_db')
+    def setUpClass(cls):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(create_db('test_db'))
 
     @classmethod
-    async def tearDownClass(cls):
-        engine = await cls.TestEngine.get_engine()
-        with engine.acquire() as connection:
+    def tearDownClass(cls):
+        loop = asyncio.get_event_loop()
+        engine = loop.run_until_complete(cls.TestEngine.get_engine())
+        with loop.run_until_complete(engine.acquire()) as connection:
             connection.execute('drop database test_db')
 
-    async def test_get_entry_all(self):
-        expected = [{'id': 1, 'login': 'user_1', 'password': 'pass_hash_1'},
-                    {'id': 2, 'login': 'user_2', 'password': 'pass_hash_2'}]
-        actual = await get_entry(users)
-        self.assertEqual(expected, actual)
+    async def test_test(self):
+        self.assertEqual(25, 25)
