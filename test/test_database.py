@@ -1,35 +1,33 @@
 import asynctest
+import pytest
 import asyncio
+import sqlalchemy_utils
 from aiopg.sa import create_engine
 from app.config import db
-from app.services.engine import create_db
+from app.services.engine import create_db, create_tables
 
 
 class TestDatabase(asynctest.TestCase):
 
-    class TestEngine(object):
-        __engine = None
-
-        @classmethod
-        async def get_engine(cls):
-            if not cls.__engine:
-                cls.__engine = await create_engine(user=db['db_user'],
-                                                   password=db['db_password'],
-                                                   host=db['db_host'],
-                                                   dbname=db['test_db'])
-            return cls.__engine
+    _engine = None
 
     @classmethod
-    def setUpClass(cls):
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(create_db('test_db'))
+    async def setup_engine(cls):
+        if not cls._engine:
+            cls._engine = await create_engine(user=db['db_user'],
+                                              password=db['db_password'],
+                                              host=db['db_host'],
+                                              dbname='ss_test')
 
     @classmethod
-    def tearDownClass(cls):
-        loop = asyncio.get_event_loop()
-        engine = loop.run_until_complete(cls.TestEngine.get_engine())
-        with loop.run_until_complete(engine.acquire()) as connection:
-            connection.execute('drop database test_db')
+    async def setup_database(cls):
+        await create_db('ss_test')
+        await cls.setup_engine()
+        await create_tables(cls._engine)
 
-    async def test_test(self):
-        self.assertEqual(25, 25)
+    def setUpClass(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(TestDatabase.setup_database())
+
+    def tearDownClass(self):
+        sqlalchemy_utils.drop_database('postgres://{db_user}:{db_password}@{db_host}/ss_test'.format(**db))
