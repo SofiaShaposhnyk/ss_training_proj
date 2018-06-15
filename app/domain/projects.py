@@ -5,14 +5,14 @@ from app.services.models import projects
 class Projects(object):
 
     @staticmethod
-    async def insert(user_id, create_date):
+    async def insert_project(user_id, create_date):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             await conn.execute(projects.insert().values(user_id=user_id,
                                                         create_date=create_date))
 
     @staticmethod
-    async def delete(entry_id=None):
+    async def delete_project(entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:
@@ -22,7 +22,7 @@ class Projects(object):
             await conn.execute(delete_query)
 
     @staticmethod
-    async def get(entry_id=None):
+    async def get_project(entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:
@@ -32,7 +32,7 @@ class Projects(object):
             return await convert_resultproxy(await conn.execute(get_query))
 
     @staticmethod
-    async def update(project_id, **kwargs):
+    async def update_project(project_id, **kwargs):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             await conn.execute(projects.update().where(

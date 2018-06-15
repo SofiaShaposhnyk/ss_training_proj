@@ -14,7 +14,7 @@ class Users(object):
             return await convert_resultproxy(result)
 
     @staticmethod
-    async def insert(login, password):
+    async def insert_user(login, password):
         pass_hash = hashlib.md5(password.encode('utf-8'))
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
@@ -22,7 +22,7 @@ class Users(object):
                                                      password_hash=pass_hash.hexdigest()))
 
     @staticmethod
-    async def delete(entry_id=None):
+    async def delete_user(entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:
@@ -32,7 +32,7 @@ class Users(object):
             await conn.execute(delete_query)
 
     @staticmethod
-    async def get(entry_id=None):
+    async def get_user(entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:

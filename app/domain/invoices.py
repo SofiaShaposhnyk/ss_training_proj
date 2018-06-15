@@ -5,14 +5,14 @@ from app.services.models import invoices
 class Invoices(object):
 
     @staticmethod
-    async def insert(project_id, description=None):
+    async def insert_invoice(project_id, description=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             await conn.execute(invoices.insert().values(project_id=project_id,
                                                         description=description))
 
     @staticmethod
-    async def delete(project_id, entry_id=None):
+    async def delete_invoice(project_id, entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:
@@ -23,7 +23,7 @@ class Invoices(object):
             await conn.execute(delete_query)
 
     @staticmethod
-    async def get(project_id, entry_id=None):
+    async def get_invoice(project_id, entry_id=None):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             if entry_id:
@@ -34,7 +34,7 @@ class Invoices(object):
             return await convert_resultproxy(await conn.execute(get_query))
 
     @staticmethod
-    async def update(project_id, entry_id, **kwargs):
+    async def update_invoice(project_id, entry_id, **kwargs):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             await conn.execute(invoices.update().where(

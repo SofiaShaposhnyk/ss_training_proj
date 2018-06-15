@@ -37,7 +37,6 @@ async def create_db(db_name):
                              'password={db_password}'.format(**db)) as engine:
         async with engine.acquire() as connection:
             await connection.execute('CREATE DATABASE {}'.format(db_name))
-            await prepare_tables()
     await engine.wait_closed()
 
 
