@@ -2,6 +2,7 @@ from sanic import Sanic
 from app.services.engine import DBEngine
 from app.resourses import login_view, registration_view, projects_view, \
     project_view, invoices_view, invoice_view
+from app.services.redis_connection import RedisConnection
 
 app = Sanic(__name__)
 
@@ -11,6 +12,8 @@ async def close_db(app, loop):
     engine = await DBEngine.get_engine()
     engine.close()
     await engine.wait_closed()
+    redis_conn = await RedisConnection.get_connection()
+    redis_conn.close()
 
 
 # @app.middleware('request')

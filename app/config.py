@@ -13,3 +13,8 @@ db = {
     'db_host': env.get('DB_HOST', 'localhost'),
     'db_port': env.get('DB_PORT', 5432)
 }
+
+redis = {
+    'redis_host': env.get('REDIS_HOST', 'localhost'),
+    'redis_port': env.get('REDIS_PORT', 6379)
+}

@@ -1,9 +1,9 @@
 import hashlib
 import secrets
-import asyncio_redis
 from sanic.response import json
 from sanic.exceptions import Unauthorized
 from app.domain.users import Users
+from app.services.redis_connection import RedisConnection
 
 
 available_url = ['/login', '/registration']
@@ -34,23 +34,17 @@ async def response_token(token):
 
 
 async def insert_redis(token, login):
-    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
-    try:
-        await connection.set(token, login, expire=86400)
-    finally:
-        connection.close()
+    connection = await RedisConnection.get_connection()
+    await connection.set(token, login, expire=86400)
 
 
 async def check_token_in_redis(token):
-    connection = await asyncio_redis.Connection.create(host='localhost', port=6379)
+    connection = await RedisConnection.get_connection()
     try:
         await connection.get(token)
+        return token
     except TypeError:
         raise Unauthorized('Authorization error')
-    else:
-        return token
-    finally:
-        connection.close()
 
 
 async def check_token(request):
