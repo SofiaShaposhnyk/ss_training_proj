@@ -3,6 +3,7 @@ from app.services.engine import DBEngine
 from app.resourses import login_view, registration_view, projects_view, \
     project_view, invoices_view, invoice_view
 from app.services.redis_connection import RedisConnection
+from app.services.authorization import check_token
 
 app = Sanic(__name__)
 
@@ -16,9 +17,9 @@ async def close_db(app, loop):
     redis_conn.close()
 
 
-# @app.middleware('request')
-# async def check_access(request):
-#     await check_token(request)
+@app.middleware('request')
+async def check_access(request):
+    await check_token(request)
 
 
 app.add_route(login_view.LoginView.as_view(), '/login')
