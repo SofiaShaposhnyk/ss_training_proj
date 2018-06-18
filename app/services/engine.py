@@ -1,6 +1,8 @@
 from aiopg.sa import create_engine
 from app.config import db
 
+group_list = ['admin', 'manager', 'user']
+
 
 class DBEngine(object):
     __engine = None
@@ -24,19 +26,20 @@ async def create_tables(engine):
         await conn.execute('''CREATE TABLE projects (
                                                      id serial PRIMARY KEY,
                                                      user_id int references users(id),
-                                                     create_date date)''')
+                                                     create_date date,
+                                                     acl jsonb)''')
         await conn.execute('''CREATE TABLE invoices (
                                                      id serial PRIMARY KEY,
                                                      project_id int references projects(id),
                                                      description varchar(255))''')
 
 
-async def create_db(db_name):
+async def create_db():
     async with create_engine('user={db_user} '
                              'host={db_host} '
                              'password={db_password}'.format(**db)) as engine:
         async with engine.acquire() as connection:
-            await connection.execute('CREATE DATABASE {}'.format(db_name))
+            await connection.execute('CREATE DATABASE {}'.format(db['db_name']))
     await engine.wait_closed()
 
 

@@ -13,7 +13,7 @@ class ProjectView(HTTPMethodView):
     async def put(request, project_id):
         data = ProjectsSchema().load(request.form)
         await Projects.update_project(project_id, user_id=data[0]['user_id'],
-                              create_date=data[0]['create_date'])
+                                      create_date=data[0]['create_date'])
         return json({'message': 'project updated'})
 
     @staticmethod

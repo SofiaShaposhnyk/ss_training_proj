@@ -6,12 +6,22 @@ from app.services.models import users
 class Users(object):
 
     @staticmethod
-    async def get_by_login(req_login):
+    async def get_hash_by_login(req_login):
         engine = await DBEngine.get_engine()
         async with engine.acquire() as conn:
             query = users.select(users.c.login == req_login)
             result = await conn.execute(query)
-            return await convert_resultproxy(result)
+            row = await result.fetchone()
+            return row['password_hash']
+
+    @staticmethod
+    async def get_id_by_login(req_login):
+        engine = await DBEngine.get_engine()
+        async with engine.acquire() as conn:
+            query = users.select(users.c.login == req_login)
+            result = await conn.execute(query)
+            row = await result.fetchone()
+            return row['id']
 
     @staticmethod
     async def insert_user(login, password):

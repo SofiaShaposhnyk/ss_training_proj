@@ -1,18 +1,22 @@
 from sanic.views import HTTPMethodView
 from sanic.response import json
+import datetime
 from app.domain.projects import Projects
-from app.services.validation import ProjectsSchema
+from app.services.acl_manager import set_delete_permissions, get_id_by_token
 
 
 class ProjectsView(HTTPMethodView):
     @staticmethod
     async def get(request):
-        return json(await Projects.get_project())
+        user_id = await get_id_by_token(request)
+        return json(await Projects.get_project(user_id))
 
     @staticmethod
     async def post(request):
-        data = ProjectsSchema().load(request.form)
-        await Projects.insert_project(user_id=data[0]['user_id'], create_date=data[0]['create_date'])
+        user_id = await get_id_by_token(request)
+        await Projects.insert_project(user_id=user_id,
+                                      create_date=datetime.date.today(),
+                                      acl=await set_delete_permissions(request))
         return json({'message': 'entry created'})
 
     @staticmethod

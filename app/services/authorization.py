@@ -16,11 +16,11 @@ async def get_token():
 async def check_login_data(login, password):
 
     hashed_pass = hashlib.md5(password.encode('utf-8')).hexdigest()
-    stored_info = await Users.get_by_login(login)
-    stored_pass = stored_info[0]['password_hash']
-    if hashed_pass == stored_pass:
+    stored_hash = await Users.get_hash_by_login(login)
+    if hashed_pass == stored_hash:
         token = await get_token()
-        await insert_redis(token, login)
+        user_id = await Users.get_id_by_login(login)
+        await insert_redis(token, str(user_id))
         return await response_token(token)
     else:
         raise Unauthorized("Authorization error")
@@ -33,9 +33,9 @@ async def response_token(token):
     return response
 
 
-async def insert_redis(token, login):
+async def insert_redis(token, user_id):
     connection = await RedisConnection.get_connection()
-    await connection.set(token, login, expire=86400)
+    await connection.set(token, user_id, expire=86400)
 
 
 async def check_token_in_redis(token):
@@ -51,7 +51,8 @@ async def check_token(request):
     token = request.headers.get('Authorization')
     if request.path in available_url:
         return True
-    elif token == await check_token_in_redis(token):
+    stored_token = await check_token_in_redis(token)
+    if stored_token and stored_token == token:
         return True
     else:
         raise Unauthorized('Authorization error')

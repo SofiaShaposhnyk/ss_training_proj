@@ -1,7 +1,7 @@
 from sanic import Sanic
 from app.services.engine import DBEngine
 from app.resourses import login_view, registration_view, projects_view, \
-    project_view, invoices_view, invoice_view
+    project_view, invoices_view, invoice_view, access_view
 from app.services.redis_connection import RedisConnection
 from app.services.authorization import check_token
 
@@ -24,6 +24,7 @@ async def check_access(request):
 
 app.add_route(login_view.LoginView.as_view(), '/login')
 app.add_route(registration_view.RegistrationView.as_view(), '/registration')
+app.add_route(access_view.AccessView.as_view(), '/access')
 app.add_route(projects_view.ProjectsView.as_view(), '/projects')
 app.add_route(project_view.ProjectView.as_view(), '/projects/<project_id>')
 app.add_route(invoices_view.InvoicesView.as_view(), '/projects/<project_id>/invoices')
