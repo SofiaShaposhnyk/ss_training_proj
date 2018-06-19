@@ -22,15 +22,6 @@ async def set_delete_permissions(request):
     return acl
 
 
-async def check_sharing_permissions(request):
-    user_id = await get_id_by_token(request)
-    acl = await get_acl(request.form.get('item_id'))
-    if acl[str(user_id)] == delete_access:
-        return True
-    else:
-        return False
-
-
 async def give_access(item_id, user_id, permissions):
     engine = await DBEngine.get_engine()
     async with engine.acquire() as connection:
