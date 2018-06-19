@@ -7,14 +7,14 @@ web = {
 }
 
 db = {
-    'db_user': env.get('DB_USER', 'postgres'),
-    'db_password': env.get('DB_PASSWORD', ''),
-    'db_name': env.get('DB_NAME', 'ss_train'),
-    'db_host': env.get('DB_HOST', 'localhost'),
-    'db_port': env.get('DB_PORT', 5432)
+    'db_user': env.get('DB_USER'),
+    'db_password': env.get('DB_PASSWORD'),
+    'db_name': env.get('DB_NAME'),
+    'db_host': env.get('DB_HOST'),
+    'db_port': env.get('DB_PORT')
 }
 
 redis = {
-    'redis_host': env.get('REDIS_HOST', 'localhost'),
-    'redis_port': env.get('REDIS_PORT', 6379)
+    'redis_host': env.get('REDIS_HOST'),
+    'redis_port': env.get('REDIS_PORT')
 }

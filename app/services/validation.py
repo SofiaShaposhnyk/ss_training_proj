@@ -19,8 +19,8 @@ class UsersSchema(BaseForm):
 
 class ProjectsSchema(BaseForm):
     id = fields.Integer(dump_only=True, required=True)
-    user_id = fields.Integer(required=True)
-    create_date = fields.Date(required=True)
+    user_id = fields.Integer()
+    create_date = fields.Date()
 
 
 class InvoicesSchema(BaseForm):

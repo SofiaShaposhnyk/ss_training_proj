@@ -21,5 +21,6 @@ class ProjectsView(HTTPMethodView):
 
     @staticmethod
     async def delete(request):
-        await Projects.delete_project()
+        user_id = await get_id_by_token(request)
+        await Projects.delete_project(user_id)
         return json({'message': 'projects deleted'})
